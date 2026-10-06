@@ -1,0 +1,1487 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TURBO SCRIPT</title>
+    <!-- استدعاء الخطوط -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-red: #ff2a2a;
+            --dark-red: #8b0000;
+            --bg-color: #050505;
+            --card-bg: #111111;
+            --border-color: #2a2a2a;
+            --text-color: #ffffff;
+            --text-muted: #aaaaaa;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* خلفية متحركة */
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0.4;
+        }
+
+        /* الحاوية الرئيسية */
+        .web-container {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            max-width: 480px;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        /* إخفاء وإظهار الشاشات */
+        .screen {
+            display: none;
+            width: 100%;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .screen.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* تنسيق شاشة البداية (Splash) */
+        .splash-content {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            min-height: 80vh;
+        }
+
+        /* الشعار */
+        .logo-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .logo-container img {
+            width: 120px;
+            height: auto;
+            border-radius: 20px;
+            box-shadow: 0 0 30px rgba(255, 42, 42, 0.5);
+            border: 2px solid var(--primary-red);
+            object-fit: cover;
+            background-color: #222;
+        }
+
+        .title-main {
+            text-align: center;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 28px;
+            font-weight: 900;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+            text-shadow: 0 0 15px rgba(255, 42, 42, 0.8);
+        }
+        .title-main span {
+            color: var(--primary-red);
+        }
+        
+        .subtitle {
+            text-align: center;
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 30px;
+        }
+
+        /* صناديق الإدخال والبطاقات */
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        
+        .card-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #fff;
+        }
+        .card-title i {
+            color: var(--primary-red);
+        }
+
+        .input-group {
+            display: flex;
+            align-items: center;
+            background: #000;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 12px 15px;
+            margin-bottom: 15px;
+            transition: 0.3s;
+        }
+        .input-group:focus-within {
+            border-color: var(--primary-red);
+            box-shadow: 0 0 15px rgba(255, 42, 42, 0.3);
+        }
+        .input-group input {
+            background: transparent;
+            border: none;
+            color: white;
+            width: 100%;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 16px;
+            outline: none;
+            text-align: center;
+            letter-spacing: 2px;
+        }
+        .input-group input::placeholder {
+            color: #555;
+            font-family: 'Cairo', sans-serif;
+            letter-spacing: 0;
+        }
+        .input-group i {
+            color: var(--text-muted);
+        }
+        
+        .promo-badge {
+            background: rgba(255, 42, 42, 0.1);
+            border: 1px dashed var(--primary-red);
+            color: var(--primary-red);
+            text-align: center;
+            padding: 12px;
+            border-radius: 10px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            margin-bottom: 20px;
+            font-size: 18px;
+            letter-spacing: 2px;
+        }
+
+        /* خطوات التفعيل */
+        .step-box {
+            background: #161616;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .step-box .step-number {
+            background: var(--primary-red);
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 12px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+        .step-box .step-info {
+            flex: 1;
+        }
+        .step-box .step-title {
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        .step-box .step-desc {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+        .step-box .step-icon {
+            color: var(--primary-red);
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+        .code-highlight {
+            color: var(--primary-red);
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            font-size: 16px;
+            margin-top: 5px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .price-highlight {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+        }
+        .price-item {
+            background: #000;
+            padding: 8px 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            text-align: center;
+            flex: 1;
+        }
+        .price-item .value {
+            color: white;
+            font-size: 16px;
+            font-weight: 700;
+            font-family: 'Orbitron', sans-serif;
+        }
+        .price-item .label {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        /* رفع الصور */
+        .upload-box {
+            border: 2px dashed var(--border-color);
+            border-radius: 12px;
+            padding: 25px 15px;
+            text-align: center;
+            cursor: pointer;
+            position: relative;
+            transition: 0.3s;
+            margin-bottom: 15px;
+            background: #0a0a0a;
+        }
+        .upload-box:hover, .upload-box.has-file {
+            border-color: var(--primary-red);
+            background: rgba(255, 42, 42, 0.05);
+        }
+        .upload-box input[type="file"] {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+        .upload-box i {
+            font-size: 24px;
+            color: var(--primary-red);
+            margin-bottom: 10px;
+        }
+        .upload-box p {
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+        .upload-box .success-icon {
+            display: none;
+            color: #00ff00;
+            font-size: 24px;
+            position: absolute;
+            top: 10px;
+            left: 10px;
+        }
+        .upload-box.has-file .success-icon {
+            display: block;
+        }
+        .upload-box.has-file p {
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        /* الأزرار */
+        .btn-primary {
+            width: 100%;
+            background: linear-gradient(90deg, var(--dark-red), var(--primary-red));
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 700;
+            font-family: 'Cairo', sans-serif;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(255, 42, 42, 0.3);
+            transition: 0.3s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+        .btn-primary:disabled {
+            background: #333;
+            box-shadow: none;
+            cursor: not-allowed;
+            color: #777;
+        }
+
+        /* شاشة الفحص (Overlay) */
+        #verification-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.95);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .verify-modal {
+            background: #111;
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 30px 20px;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 0 50px rgba(255, 0, 0, 0.2);
+            position: relative;
+            animation: zoomIn 0.3s ease-out;
+        }
+        @keyframes zoomIn {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        .close-overlay {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            color: var(--text-muted);
+            font-size: 22px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .close-overlay:hover {
+            color: var(--primary-red);
+        }
+        .verify-modal .icon-top {
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 42, 42, 0.1);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto 20px;
+            color: var(--primary-red);
+            font-size: 24px;
+            border: 1px solid var(--primary-red);
+        }
+        .verify-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 14px;
+            letter-spacing: 2px;
+            color: var(--primary-red);
+            margin-bottom: 8px;
+        }
+        .verify-desc {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 25px;
+        }
+        .verify-steps {
+            text-align: right;
+            margin-bottom: 25px;
+        }
+        .step-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px;
+            background: #0a0a0a;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border: 1px solid var(--border-color);
+            transition: 0.3s;
+            font-size: 14px;
+        }
+        .step-item.active {
+            border-color: var(--primary-red);
+            background: rgba(255, 42, 42, 0.1);
+        }
+        .step-item.done {
+            color: #00ff00;
+            border-color: #00ff00;
+            background: rgba(0, 255, 0, 0.05);
+        }
+        .step-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #222;
+            font-size: 12px;
+            color: #555;
+            flex-shrink: 0;
+        }
+        .step-item.active .step-icon {
+            background: var(--primary-red);
+            color: white;
+            animation: pulse 1s infinite;
+        }
+        .step-item.done .step-icon {
+            background: #00ff00;
+            color: #000;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        .progress-bar-container {
+            width: 100%;
+            height: 8px;
+            background: #222;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: var(--primary-red);
+            transition: width 0.5s ease;
+            box-shadow: 0 0 10px var(--primary-red);
+        }
+        .progress-text {
+            font-size: 13px;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        /* شاشة عرض الكود */
+        .code-box {
+            background: #000;
+            border: 2px dashed var(--primary-red);
+            border-radius: 12px;
+            padding: 25px 15px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 22px;
+            font-weight: 900;
+            color: var(--primary-red);
+            letter-spacing: 3px;
+            margin: 20px 0;
+            text-shadow: 0 0 15px rgba(255,42,42,0.6);
+            word-break: break-all;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .code-box:active {
+            background: rgba(255, 42, 42, 0.1);
+        }
+
+        /* شاشة اختيار اللعبة */
+        .game-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 18px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        .game-card:hover {
+            border-color: var(--primary-red);
+            transform: translateY(-2px);
+        }
+        .game-info {
+            flex: 1;
+        }
+        .game-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+        .game-subtitle {
+            font-size: 12px;
+            color: #00ff00;
+            background: rgba(0, 255, 0, 0.1);
+            padding: 4px 10px;
+            border-radius: 6px;
+            display: inline-block;
+        }
+        .game-img {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            object-fit: cover;
+            border: 1px solid var(--border-color);
+        }
+        .arrow-icon {
+            color: var(--primary-red);
+            margin-right: 15px;
+            font-size: 20px;
+        }
+
+        /* شاشة توقع التفاحة */
+        .apple-game-container {
+            display: flex;
+            flex-direction: row; /* لضمان ترتيب العناصر من اليمين لليسار */
+            margin-bottom: 20px;
+            position: relative;
+            background: #0a0a0a;
+            padding: 15px;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+        }
+        .multipliers-column {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            width: 60px;
+            padding-left: 10px;
+            font-size: 12px;
+            color: var(--text-muted);
+            font-family: 'Orbitron', sans-serif;
+            text-align: left;
+            flex-shrink: 0;
+            padding-top: 5px;
+            padding-bottom: 5px;
+        }
+        .apple-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            flex: 1;
+            position: relative;
+            margin-right: 10px; /* مسافة بين الأرقام والشبكة */
+        }
+        .apple-cell {
+            background: #000;
+            border: 1px solid rgba(255, 42, 42, 0.3);
+            border-radius: 50%;
+            aspect-ratio: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+        }
+        .apple-cell img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: 0.3s;
+        }
+        .apple-cell img.apple-revealed {
+            animation: popIn 0.3s ease-out forwards;
+        }
+        @keyframes popIn {
+            0% { transform: scale(0); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        /* خط أحمر متحرك */
+        .scanline {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: red;
+            box-shadow: 0 0 15px red;
+            display: none;
+            z-index: 10;
+            border-radius: 2px;
+        }
+        .scanline.active {
+            display: block;
+            animation: scan 2s linear forwards;
+        }
+        @keyframes scan {
+            0% { top: 0; opacity: 1; }
+            90% { top: 100%; opacity: 1; }
+            100% { top: 100%; opacity: 0; }
+        }
+
+        /* شاشة الطائرة (Crash) */
+        .crash-main-card {
+            background: linear-gradient(180deg, #1a0000 0%, #0a0000 100%);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 40px 20px;
+            text-align: center;
+            margin-bottom: 20px;
+            box-shadow: 0 0 50px rgba(255, 42, 42, 0.1) inset;
+            position: relative;
+        }
+        .crash-multiplier {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 65px;
+            font-weight: 900;
+            color: var(--primary-red);
+            text-shadow: 0 0 30px rgba(255, 42, 42, 0.8);
+            margin: 20px 0;
+            transition: 0.3s;
+        }
+        .crash-confidence {
+            color: #00ff00;
+            font-size: 16px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+        .history-list {
+            margin-top: 25px;
+        }
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px;
+            background: #111;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            margin-bottom: 10px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 14px;
+        }
+        .history-item .conf { color: #00ff00; }
+        .history-item .mult { color: var(--primary-red); }
+
+        /* أزرار التحكم */
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        .btn-secondary {
+            flex: 1;
+            background: #111;
+            color: white;
+            border: 1px solid var(--border-color);
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-secondary:hover {
+            background: #222;
+            border-color: var(--primary-red);
+        }
+
+        /* شريط التنبيه (Toast) */
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100px);
+            background: var(--primary-red);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 12px;
+            font-weight: 700;
+            z-index: 2000;
+            transition: 0.4s ease-out;
+            box-shadow: 0 10px 30px rgba(255,0,0,0.5);
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* مؤشر التحميل */
+        .loader {
+            border: 4px solid #222;
+            border-top: 4px solid var(--primary-red);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin-top: 30px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* تنسيقات إضافية */
+        .text-center { text-align: center; }
+        .mt-3 { margin-top: 15px; }
+        .mb-3 { margin-bottom: 15px; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <!-- خلفية متحركة -->
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- التنبيهات (Toast) -->
+    <div id="toast" class="toast">تم النسخ بنجاح!</div>
+
+    <div class="web-container">
+        
+        <!-- ================= الشاشة 0: البداية (Splash) ================= -->
+        <div id="screen-splash" class="screen active">
+            <div class="splash-content">
+                <div class="logo-container">
+                    <img src="https://i.postimg.cc/MGcf0R7R/Turbo-png.png" alt="Turbo Logo">
+                </div>
+                <h1 class="title-main">TURBO <span>SCRIPT</span></h1>
+                <p class="subtitle">سكريبت التوقعات الذكية ومفاتيح التفعيل</p>
+                <div class="loader"></div>
+            </div>
+        </div>
+
+        <!-- ================= الشاشة 1: التفعيل ================= -->
+        <div id="screen-activation" class="screen">
+            <div class="logo-container">
+                <img src="https://i.postimg.cc/MGcf0R7R/Turbo-png.png" alt="Turbo Logo">
+            </div>
+            
+            <h1 class="title-main" style="font-size: 24px;">شروط تفعيل تيربو</h1>
+            <p class="subtitle">اتبع الخطوات بالأسفل بالترتيب (التسجيل بالبروموكود Pemo1x)</p>
+            
+            <div class="promo-badge">PEMO1X VIP ACTIVATION</div>
+            
+            <div class="card">
+                <div class="card-title"><i class="fa-solid fa-key"></i> بوابة فتح السكريبت بكود التفعيل</div>
+                
+                <div class="input-group">
+                    <i class="fa-solid fa-lock"></i>
+                    <input type="text" id="activation-code-input" placeholder="أدخل كود التفعيل العشوائي (PEMO-XXXX)" maxlength="20">
+                </div>
+                <button class="btn-primary" style="padding: 14px; font-size: 16px;" onclick="showScreen('screen-menu')">
+                    <i class="fa-solid fa-bolt"></i> فتح السكريبت
+                </button>
+            </div>
+
+            <div class="card-title mt-3" style="justify-content: center;"><i class="fa-solid fa-list-check"></i> خطوات استلام كود التفعيل</div>
+            
+            <!-- الخطوة 1 -->
+            <div class="step-box">
+                <div class="step-number">1</div>
+                <div class="step-info">
+                    <div class="step-title">التسجيل بكود التفعيل (البرومو كود)</div>
+                    <div class="step-desc">امنح حساباً جديداً كلياً باستخدام البروموكود الإنجليزي Pemo1x عند التسجيل</div>
+                    <div class="code-highlight">Pemo1x <i class="fa-regular fa-copy" style="font-size: 14px; cursor: pointer; color: #fff;" onclick="copyText('Pemo1x')"></i></div>
+                </div>
+                <i class="fa-solid fa-star step-icon"></i>
+            </div>
+
+            <!-- الخطوة 2 -->
+            <div class="step-box">
+                <div class="step-number">2</div>
+                <div class="step-info">
+                    <div class="step-title">الحد الأدنى للشحن والايداع</div>
+                    <div class="step-desc">اشحن حسابك الجديد لتغطية الرسوم المطلوبة (مبلغ 3$ أو 120 جنيه مصري)</div>
+                    <div class="price-highlight">
+                        <div class="price-item"><div class="value">$3</div><div class="label">USD</div></div>
+                        <div class="price-item"><div class="value">120</div><div class="label">جنيه مصري</div></div>
+                    </div>
+                </div>
+                <i class="fa-solid fa-shield-halved step-icon"></i>
+            </div>
+
+            <!-- الخطوة 3 -->
+            <div class="step-box">
+                <div class="step-number">3</div>
+                <div class="step-info">
+                    <div class="step-title">إرفاق سكرين شوت التسجيل</div>
+                    <div class="step-desc">أدخل صورة تثبت تسجيلك بالبروموكود Pemo1x</div>
+                </div>
+                <i class="fa-solid fa-image step-icon"></i>
+            </div>
+
+            <!-- الخطوة 4 -->
+            <div class="step-box">
+                <div class="step-number">4</div>
+                <div class="step-info">
+                    <div class="step-title">إرفاق سكرين شوت الإيداع</div>
+                    <div class="step-desc">أدخل صورة تثبت عملية الإيداع</div>
+                </div>
+                <i class="fa-solid fa-image step-icon"></i>
+            </div>
+
+            <!-- الخطوة 5 -->
+            <div class="step-box" style="border-color: var(--primary-red);">
+                <div class="step-number">5</div>
+                <div class="step-info">
+                    <div class="step-title">كتابة الـ ID واستلام الكود العشوائي</div>
+                    <div class="step-desc">أدخل رقم الـ ID (10 أرقام) لاستلام الكود العشوائي</div>
+                </div>
+                <i class="fa-solid fa-id-card step-icon"></i>
+            </div>
+
+            <div class="card mt-3">
+                <div class="input-group">
+                    <i class="fa-solid fa-user"></i>
+                    <input type="text" id="player-id" placeholder="أدخل ID الحساب (10 أرقام)" maxlength="10" inputmode="numeric">
+                </div>
+
+                <!-- رفع الصور -->
+                <div class="upload-box" id="upload-box-1">
+                    <input type="file" id="file-register" accept="image/*">
+                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                    <p>اضغط هنا لرفع سكرين شوت التسجيل</p>
+                    <i class="fa-solid fa-circle-check success-icon"></i>
+                </div>
+
+                <div class="upload-box" id="upload-box-2">
+                    <input type="file" id="file-deposit" accept="image/*">
+                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                    <p>اضغط هنا لرفع سكرين شوت الإيداع</p>
+                    <i class="fa-solid fa-circle-check success-icon"></i>
+                </div>
+
+                <button class="btn-primary" id="btn-verify" disabled>
+                    <i class="fa-solid fa-shield-halved"></i> تأكيد البيانات واستلام الكود
+                </button>
+            </div>
+        </div>
+
+        <!-- ================= شاشة عرض الكود ================= -->
+        <div id="screen-code-result" class="screen">
+            <div class="logo-container">
+                <img src="https://i.postimg.cc/MGcf0R7R/Turbo-png.png" alt="Turbo Logo">
+            </div>
+            <h2 class="title-main" style="font-size: 24px;">تم التحقق بنجاح</h2>
+            <p class="subtitle">كود التفعيل الخاص بك جاهز</p>
+            
+            <div class="code-box" id="activation-code">PEMO-XXXX-XXXX-XXXX</div>
+            
+            <p style="font-size: 14px; color: #00ff00; margin-bottom: 25px; text-align: center;">
+                <i class="fa-solid fa-circle-check"></i> تم ربط الكود بحسابك بنجاح
+            </p>
+
+            <button class="btn-primary" id="btn-enter-now">
+                <i class="fa-solid fa-right-to-bracket"></i> دخول الآن
+            </button>
+        </div>
+
+        <!-- ================= الشاشة 2: اختيار اللعبة ================= -->
+        <div id="screen-menu" class="screen">
+            <div class="logo-container" style="margin-bottom: 15px;">
+                <img src="https://i.postimg.cc/MGcf0R7R/Turbo-png.png" alt="Turbo Logo" style="width: 80px; height: 80px;">
+            </div>
+            <h2 class="title-main" style="font-size: 26px; margin-bottom: 5px;">اختر اللعبة</h2>
+            <p class="subtitle">اختر اللعبة المناسبة لك لبدء توقع ذكي</p>
+            <p style="text-align: center; font-family: 'Orbitron'; color: var(--primary-red); font-size: 15px; margin-bottom: 25px;">ID: <span id="display-id">--------</span></p>
+
+            <div class="game-card" onclick="showScreen('screen-apple')">
+                <i class="fa-solid fa-chevron-left arrow-icon"></i>
+                <div class="game-info" style="text-align: left;">
+                    <div class="game-title">Apple of Fortune</div>
+                    <div class="game-subtitle">متاحة الآن</div>
+                </div>
+                <!-- تم تحديث صورة التفاحة -->
+                <img src="https://i.postimg.cc/9Qyg1Rcw/apple.turbo.webp" alt="Apple Game" class="game-img">
+            </div>
+
+            <div class="game-card" onclick="showScreen('screen-crash')">
+                <i class="fa-solid fa-chevron-left arrow-icon"></i>
+                <div class="game-info" style="text-align: left;">
+                    <div class="game-title">Crash</div>
+                    <div class="game-subtitle">توقع الطائرة متاح الآن</div>
+                </div>
+                <!-- تم تحديث صورة كراش -->
+                <img src="https://i.postimg.cc/pLKckhPm/crash.turbo.webp" alt="Crash Game" class="game-img">
+            </div>
+            
+            <p class="text-center mt-3" style="font-size: 14px; color: var(--text-muted); cursor: pointer;" onclick="showScreen('screen-activation')">
+                العودة إلى صفحة التفعيل والخطوات
+            </p>
+        </div>
+
+        <!-- ================= الشاشة 3: لعبة التفاحة ================= -->
+        <div id="screen-apple" class="screen">
+            <!-- تم إضافة اللوجو هنا بناءً على طلبك -->
+            <div class="logo-container" style="margin-bottom: 10px;">
+                <img src="https://i.postimg.cc/MGcf0R7R/Turbo-png.png" alt="Turbo Logo" style="width: 60px; height: 60px;">
+            </div>
+            <h2 class="title-main" style="font-size: 24px;">Apple of Fortune</h2>
+            <p class="subtitle">توقع التفاحة</p>
+            
+            <div class="card" style="padding: 15px; background: #0a0a0a; border: 1px solid #2a2a2a; border-radius: 12px;">
+                <div class="apple-game-container">
+                    <!-- Left column for multipliers -->
+                    <div class="multipliers-column" id="multipliers-col">
+                        <!-- Populated by JS -->
+                    </div>
+                    
+                    <!-- Right grid for apples -->
+                    <div class="apple-grid" id="apple-grid">
+                        <div class="scanline" id="scanline"></div>
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+                
+                <div class="action-buttons">
+                    <button class="btn-secondary" onclick="resetAppleGame()">
+                        <i class="fa-solid fa-rotate-right"></i> إعادة التشغيل
+                    </button>
+                    <button class="btn-primary" id="btn-predict-apple">
+                        <i class="fa-solid fa-play"></i> تشغيل التوقع
+                    </button>
+                </div>
+            </div>
+            
+            <p class="text-center mt-3" style="font-size: 14px; color: #aaa; cursor: pointer;" onclick="showScreen('screen-menu')">
+                <i class="fa-solid fa-arrow-right"></i> العودة لاختيار اللعبة
+            </p>
+        </div>
+
+        <!-- ================= الشاشة 4: لعبة الطائرة (Crash) ================= -->
+        <div id="screen-crash" class="screen">
+            <h2 class="title-main" style="font-size: 24px;">TURBO CRASH</h2>
+            <p class="subtitle">توقع الطائرة</p>
+            
+            <div class="crash-main-card">
+                <div style="font-size: 15px; color: var(--text-muted);">الأوحد المتوقع للطائرة</div>
+                <div class="crash-multiplier" id="crash-multiplier">3.51x</div>
+                <div class="crash-confidence">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    <span>نسبة الثقة <span id="crash-confidence">98%</span></span>
+                </div>
+            </div>
+
+            <button class="btn-primary" id="btn-update-signal">
+                <i class="fa-solid fa-bolt"></i> تحديث إشارة الطائرة القادمة الآن
+            </button>
+
+            <div style="display: flex; justify-content: space-between; margin-top: 20px; font-size: 14px; color: var(--text-muted);">
+                <span>آخر تحديث للسيرفر</span>
+                <span id="crash-timer">02:51:25</span>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; margin-top: 10px; background: rgba(255,0,0,0.1); padding: 12px 15px; border-radius: 12px; border: 1px solid var(--border-color);">
+                <span>نقطة الانسحاب الموصى بها</span>
+                <span style="color: var(--primary-red); font-weight: 700;" id="crash-cashout">الخروج آمن 3.33x</span>
+            </div>
+
+            <div class="history-list">
+                <div style="font-size: 15px; margin-bottom: 15px; color: var(--text-muted);">الإشارات السابقة</div>
+                <div class="history-item">
+                    <span class="mult">x3.80</span>
+                    <span>02:51:25</span>
+                    <span class="conf">ثقة 98%</span>
+                </div>
+                <div class="history-item">
+                    <span class="mult">x2.13</span>
+                    <span>02:51:16</span>
+                    <span class="conf">ثقة 94%</span>
+                </div>
+            </div>
+
+            <p class="text-center mt-3" style="font-size: 14px; color: var(--text-muted); cursor: pointer;" onclick="showScreen('screen-menu')">
+                <i class="fa-solid fa-arrow-right"></i> العودة لاختيار اللعبة
+            </p>
+        </div>
+
+    </div>
+
+    <!-- ================= شاشة الفحص (Overlay) ================= -->
+    <div id="verification-overlay">
+        <div class="verify-modal">
+            <!-- زر الإغلاق X -->
+            <i class="fa-solid fa-xmark close-overlay" onclick="document.getElementById('verification-overlay').style.display='none'"></i>
+            
+            <div class="icon-top"><i class="fa-solid fa-shield-halved"></i></div>
+            <div class="verify-title">TURBO SECURE VERIFICATION</div>
+            <div class="verify-desc">جاري مراجعة السكريبت وتوليد الكود</div>
+            
+            <div class="verify-steps">
+                <div class="step-item" id="step-1">
+                    <div class="step-icon"><i class="fa-solid fa-check"></i></div>
+                    <div>جاري فحص سكرين التسجيل بالبروموكود Pemo1x</div>
+                </div>
+                <div class="step-item" id="step-2">
+                    <div class="step-icon"><i class="fa-solid fa-check"></i></div>
+                    <div>جاري التحقق من سكرين شوت الإيداع واشحن</div>
+                </div>
+                <div class="step-item" id="step-3">
+                    <div class="step-icon"><i class="fa-solid fa-check"></i></div>
+                    <div>تم الربط معرف الحساب (<span id="verify-id-display">--------</span>) بالسيرفر المشفر</div>
+                </div>
+                <div class="step-item" id="step-4">
+                    <div class="step-icon"><i class="fa-solid fa-check"></i></div>
+                    <div>جاري استخراج كود التفعيل ووضعه تلقائياً لفتح السكريبت</div>
+                </div>
+            </div>
+
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="verify-progress"></div>
+            </div>
+            <div class="progress-text">
+                <span>جاري الفحص...</span>
+                <span id="verify-percent">0%</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ================= 1. خلفية متحركة (Canvas) =================
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+        
+        let particlesArray = [];
+        const numberOfParticles = 60;
+        
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            initParticles();
+        });
+        
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 1;
+                this.speedX = Math.random() * 1 - 0.5;
+                this.speedY = Math.random() * 1 - 0.5;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                if (this.x > canvas.width || this.x < 0) this.speedX *= -1;
+                if (this.y > canvas.height || this.y < 0) this.speedY *= -1;
+            }
+            draw() {
+                ctx.fillStyle = 'rgba(255, 42, 42, 0.5)';
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+        
+        function initParticles() {
+            particlesArray = [];
+            for (let i = 0; i < numberOfParticles; i++) {
+                particlesArray.push(new Particle());
+            }
+        }
+        
+        function connectParticles() {
+            for (let a = 0; a < particlesArray.length; a++) {
+                for (let b = a; b < particlesArray.length; b++) {
+                    let distance = ((particlesArray[a].x - particlesArray[b].x) * (particlesArray[a].x - particlesArray[b].x)) + 
+                                   ((particlesArray[a].y - particlesArray[b].y) * (particlesArray[a].y - particlesArray[b].y));
+                    if (distance < (canvas.width / 7) * (canvas.height / 7)) {
+                        let opacityValue = 1 - (distance / 20000);
+                        ctx.strokeStyle = 'rgba(255, 42, 42, ' + opacityValue + ')';
+                        ctx.lineWidth = 1;
+                        ctx.beginPath();
+                        ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
+                        ctx.lineTo(particlesArray[b].x, particlesArray[b].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+        }
+        
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let i = 0; i < particlesArray.length; i++) {
+                particlesArray[i].update();
+                particlesArray[i].draw();
+            }
+            connectParticles();
+            requestAnimationFrame(animateParticles);
+        }
+        
+        initParticles();
+        animateParticles();
+
+        // ================= 2. التنقل بين الشاشات (مع الحماية) =================
+        function showScreen(screenId) {
+            // حماية شاشات الألعاب: منع الفتح إلا بعد إدخال البيانات المطلوبة
+            if (screenId === 'screen-menu' || screenId === 'screen-apple' || screenId === 'screen-crash') {
+                const idValue = document.getElementById('player-id').value;
+                const file1 = document.getElementById('file-register').files;
+                const file2 = document.getElementById('file-deposit').files;
+
+                if (idValue.length !== 10 || file1.length === 0 || file2.length === 0) {
+                    // استخدم التنبيه المخصص (Toast) بدلاً من Alert المتصفح
+                    showToast('عذراً، يجب عليك إدخال الـ ID (10 أرقام) ورفع صورتي (التسجيل والإيداع) أولاً لفتح الألعاب.');
+                    // توجيه المستخدم لصفحة التفعيل لإكمال البيانات
+                    document.querySelectorAll('.screen').forEach(screen => screen.classList.remove('active'));
+                    document.getElementById('screen-activation').classList.add('active');
+                    return;
+                }
+            }
+
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        // دالة إظهار التنبيه المخصص
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.innerText = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3500); // يختفي بعد 3.5 ثواني
+        }
+
+        // الانتقال من شاشة البداية إلى شاشة التفعيل بعد 3 ثوانٍ
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                const splash = document.getElementById('screen-splash');
+                const activation = document.getElementById('screen-activation');
+                if (splash && splash.classList.contains('active')) {
+                    splash.classList.remove('active');
+                    activation.classList.add('active');
+                }
+            }, 3000);
+        });
+
+        // ================= 3. منطق التحقق من المدخلات =================
+        const playerIdInput = document.getElementById('player-id');
+        const fileRegisterInput = document.getElementById('file-register');
+        const fileDepositInput = document.getElementById('file-deposit');
+        const uploadBox1 = document.getElementById('upload-box-1');
+        const uploadBox2 = document.getElementById('upload-box-2');
+        const btnVerify = document.getElementById('btn-verify');
+
+        // التحقق من الـ ID (10 أرقام فقط)
+        playerIdInput.addEventListener('input', function(e) {
+            this.value = this.value.replace(/[^0-9]/g, ''); // أرقام فقط
+            if (this.value.length > 10) {
+                this.value = this.value.slice(0, 10); // 10 أرقام كحد أقصى
+            }
+            checkFormValidity();
+        });
+
+        // التحقق من رفع الصور
+        fileRegisterInput.addEventListener('change', function() {
+            if (this.files && this.files.length > 0) {
+                uploadBox1.classList.add('has-file');
+                uploadBox1.querySelector('p').innerText = 'تم رفع سكرين التسجيل بنجاح';
+            }
+            checkFormValidity();
+        });
+
+        fileDepositInput.addEventListener('change', function() {
+            if (this.files && this.files.length > 0) {
+                uploadBox2.classList.add('has-file');
+                uploadBox2.querySelector('p').innerText = 'تم رفع سكرين الإيداع بنجاح';
+            }
+            checkFormValidity();
+        });
+
+        function checkFormValidity() {
+            const idValid = playerIdInput.value.length === 10;
+            const file1Valid = fileRegisterInput.files.length > 0;
+            const file2Valid = fileDepositInput.files.length > 0;
+
+            if (idValid && file1Valid && file2Valid) {
+                btnVerify.disabled = false;
+            } else {
+                btnVerify.disabled = true;
+            }
+        }
+
+        // ================= 4. عملية الفحص والتحقق (Loading Overlay) =================
+        const overlay = document.getElementById('verification-overlay');
+        const step1 = document.getElementById('step-1');
+        const step2 = document.getElementById('step-2');
+        const step3 = document.getElementById('step-3');
+        const step4 = document.getElementById('step-4');
+        const progressBar = document.getElementById('verify-progress');
+        const percentText = document.getElementById('verify-percent');
+        const verifyIdDisplay = document.getElementById('verify-id-display');
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        btnVerify.addEventListener('click', async () => {
+            if (btnVerify.disabled) return;
+
+            overlay.style.display = 'flex';
+            verifyIdDisplay.innerText = playerIdInput.value; // عرض الـ ID في شاشة الفحص
+
+            // الخطوة 1
+            step1.classList.add('active');
+            progressBar.style.width = '10%';
+            percentText.innerText = '10%';
+            await sleep(1200);
+
+            step1.classList.remove('active');
+            step1.classList.add('done');
+            progressBar.style.width = '33%';
+            percentText.innerText = '33%';
+            
+            // الخطوة 2
+            step2.classList.add('active');
+            await sleep(1200);
+
+            step2.classList.remove('active');
+            step2.classList.add('done');
+            progressBar.style.width = '66%';
+            percentText.innerText = '66%';
+
+            // الخطوة 3
+            step3.classList.add('active');
+            await sleep(1200);
+
+            step3.classList.remove('active');
+            step3.classList.add('done');
+            progressBar.style.width = '85%';
+            percentText.innerText = '85%';
+
+            // الخطوة 4
+            step4.classList.add('active');
+            await sleep(1200);
+
+            step4.classList.remove('active');
+            step4.classList.add('done');
+            progressBar.style.width = '100%';
+            percentText.innerText = '100%';
+
+            await sleep(500);
+
+            // إخفاء شاشة التحميل
+            overlay.style.display = 'none';
+
+            // توليد كود التفعيل العشوائي
+            const randomCode = 'PEMO-' + Math.random().toString(36).substring(2, 6).toUpperCase() + '-' + Math.random().toString(36).substring(2, 6).toUpperCase() + '-' + Math.random().toString(36).substring(2, 6).toUpperCase();
+            document.getElementById('activation-code').innerText = randomCode;
+
+            // الانتقال لشاشة الكود
+            showScreen('screen-code-result');
+            
+            // إعادة ضبط شاشة التحميل للاستخدام القادم
+            setTimeout(() => {
+                step1.classList.remove('done');
+                step2.classList.remove('done');
+                step3.classList.remove('done');
+                step4.classList.remove('done');
+                progressBar.style.width = '0%';
+                percentText.innerText = '0%';
+            }, 1000);
+        });
+
+        // زر الدخول للعبة
+        document.getElementById('btn-enter-now').addEventListener('click', () => {
+            // التأكد مرة أخرى قبل الانتقال
+            const idValid = playerIdInput.value.length === 10;
+            const file1Valid = fileRegisterInput.files.length > 0;
+            const file2Valid = fileDepositInput.files.length > 0;
+
+            if (!idValid || !file1Valid || !file2Valid) {
+                showToast('الرجاء إكمال جميع البيانات المطلوبة!');
+                showScreen('screen-activation');
+                return;
+            }
+
+            document.getElementById('display-id').innerText = playerIdInput.value; // نقل الـ ID لشاشة الألعاب
+            showScreen('screen-menu');
+        });
+
+        // ================= 5. لعبة التفاحة (Apple of Fortune) =================
+        const appleGrid = document.getElementById('apple-grid');
+        const multipliersCol = document.getElementById('multipliers-col');
+        const scanline = document.getElementById('scanline');
+
+        // الصور المطلوبة بعد التعديل
+        const initialImageUrl = 'https://raw.githubusercontent.com/turbo1-2/my-images/refs/heads/main/efc0e4cb-1559-4172-8df1-389128bf9fa7.png'; // الصورة الابتدائية عند فتح اللعبة
+        const losingImageUrl = 'https://raw.githubusercontent.com/turbo1-2/my-images/refs/heads/main/new_version_1.png'; // الصورة الفارغة (الخلايا الخاسرة)
+        const winningImageUrl = 'https://raw.githubusercontent.com/turbo1-2/my-images/refs/heads/main/new_version_3.png'; // التفاحة الفائزة
+
+        // أرقام المضاعفات
+        const multipliers = [349.68, 69.93, 27.92, 11.18, 6.71, 4.02, 2.41, 1.93, 1.54, 1.23];
+
+        function createAppleGame() {
+            appleGrid.innerHTML = '';
+            multipliersCol.innerHTML = '';
+            
+            // إضافة خط المسح
+            appleGrid.appendChild(scanline);
+
+            // إضافة الأرقام على اليسار
+            multipliers.forEach(num => {
+                const span = document.createElement('span');
+                span.innerText = num;
+                multipliersCol.appendChild(span);
+            });
+
+            // 5 أعمدة × 10 صفوف = 50 خلية
+            for (let i = 0; i < 50; i++) {
+                const cell = document.createElement('div');
+                cell.classList.add('apple-cell');
+                const img = document.createElement('img');
+                img.src = initialImageUrl; // استخدام الصورة الابتدائية الجديدة
+                img.alt = 'Cell';
+                cell.appendChild(img);
+                appleGrid.appendChild(cell);
+            }
+        }
+
+        document.getElementById('btn-predict-apple').addEventListener('click', () => {
+            // إعادة تعيين الشبكة أولاً (ستعود للصورة الابتدائية)
+            resetAppleGame();
+            
+            // تشغيل الخط الأحمر (Scanline)
+            scanline.classList.remove('active');
+            void scanline.offsetWidth; // Trigger reflow
+            scanline.classList.add('active');
+
+            // بعد انتهاء الخط الأحمر (بعد ثانيتين)، تظهر التفاحات
+            setTimeout(() => {
+                scanline.classList.remove('active');
+                
+                const cells = appleGrid.querySelectorAll('.apple-cell');
+                
+                // في كل صف (5 خلايا)، نختار خلية واحدة عشوائية لتكون تفاحة
+                for (let row = 0; row < 10; row++) {
+                    const randomCol = Math.floor(Math.random() * 5);
+                    
+                    // إظهار التفاحة مع تأخير بسيط لكل صف
+                    setTimeout(() => {
+                        for (let col = 0; col < 5; col++) {
+                            const cellIndex = row * 5 + col;
+                            const img = cells[cellIndex].querySelector('img');
+                            
+                            if (col === randomCol) {
+                                img.src = winningImageUrl; // التفاحة الفائزة (new_version_3)
+                            } else {
+                                img.src = losingImageUrl; // الخلية الخاسرة (new_version_1)
+                            }
+                            img.classList.add('apple-revealed'); // إضافة أنيميشن الظهور
+                        }
+                    }, row * 150); // تأثير متتالي
+                }
+            }, 2000); // مدة الخط الأحمر
+        });
+
+        function resetAppleGame() {
+            const images = appleGrid.querySelectorAll('img');
+            images.forEach(img => {
+                img.src = initialImageUrl; // إعادة الصورة إلى الحالة الابتدائية
+                img.classList.remove('apple-revealed'); // إزالة أنيميشن الظهور
+            });
+        }
+
+        // ================= 6. لعبة الطائرة (Crash) =================
+        document.getElementById('btn-update-signal').addEventListener('click', () => {
+            const updateBtn = document.getElementById('btn-update-signal');
+            const multDisplay = document.getElementById('crash-multiplier');
+            const confDisplay = document.getElementById('crash-confidence');
+            const cashoutDisplay = document.getElementById('crash-cashout');
+            const timerDisplay = document.getElementById('crash-timer');
+
+            // تغيير النص مؤقتاً لمحاكاة التحديث
+            updateBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري تحديث الإشارة...';
+            updateBtn.disabled = true;
+
+            setTimeout(() => {
+                // توليد أرقام عشوائية
+                const randomMult = (Math.random() * 8 + 1.1).toFixed(2); // بين 1.10 و 9.10
+                const randomConf = Math.floor(Math.random() * 14 + 85); // بين 85% و 98%
+                const cashoutValue = (randomMult - (Math.random() * 0.2 + 0.1)).toFixed(2); // أقل من المضاعف بقليل
+
+                // تحديث الواجهة
+                multDisplay.innerText = randomMult + 'x';
+                confDisplay.innerText = randomConf + '%';
+                cashoutDisplay.innerText = 'الخروج آمن ' + cashoutValue + 'x';
+                
+                // تحديث الوقت
+                const now = new Date();
+                timerDisplay.innerText = now.toLocaleTimeString('en-GB');
+
+                // إعادة الزر
+                updateBtn.innerHTML = '<i class="fa-solid fa-bolt"></i> تحديث إشارة الطائرة القادمة الآن';
+                updateBtn.disabled = false;
+
+                // إضافة السجل السابق للقائمة
+                const historyList = document.querySelector('.history-list');
+                const newHistoryItem = document.createElement('div');
+                newHistoryItem.classList.add('history-item');
+                newHistoryItem.innerHTML = `
+                    <span class="mult">x${randomMult}</span>
+                    <span>${now.toLocaleTimeString('en-GB')}</span>
+                    <span class="conf">ثقة ${randomConf}%</span>
+                `;
+                // إدراج بعد العنوان
+                historyList.insertBefore(newHistoryItem, historyList.children[1]);
+                
+                // الاحتفاظ بآخر 4 عناصر فقط في السجل
+                if (historyList.children.length > 5) {
+                    historyList.removeChild(historyList.lastElementChild);
+                }
+
+            }, 800); // تأخير لمحاكاة الاتصال بالسيرفر
+        });
+
+        // إنشاء الشبكة عند بدء التشغيل
+        createAppleGame();
+
+        // تفعيل نسخ الكود عند الضغط عليه
+        document.getElementById('activation-code').addEventListener('click', function() {
+            const code = this.innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                showToast('تم نسخ الكود بنجاح!');
+            });
+        });
+
+        // نسخ النص (للبروموكود Pemo1x)
+        function copyText(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('تم نسخ ' + text + ' بنجاح!');
+            });
+        }
+
+    </script>
+</body>
+</html>
